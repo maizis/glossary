@@ -1,0 +1,71 @@
+<template>
+  <div class="glossary">
+    <div class="glossary-item is-title">
+      {{ 'navigation.glossary' | translate }}
+    </div>
+
+    <div class="glossary-search">
+      <div class="adg-search-bar">
+        <div class="glossary-search-bar">
+          <span class="icon">
+            <i class="adg-icon-search" />
+          </span>
+          <BInput
+            :placeholder="'glossary.search.metric' | translate"
+            @input="onSearchChange"
+            type="search" />
+        </div>
+      </div>
+    </div>
+
+    <div class="glossary-defs">
+      <div
+        class="glossary-def"
+        v-for="def in (isSearching ? results : definitions)"
+        :key="def.id">
+        <div class="glossary-def-title">
+          {{ def.name }}
+        </div>
+        <div class="glossary-def-content">
+          {{ def.description }}
+        </div>
+      </div>
+
+      <div
+        class="glossary-def"
+        v-if="isSearching && !results.length">
+        <div class="glossary-def-title">
+          {{ 'multiselect.no-result' | translate }}
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import { configStore } from '@/store/config'
+import { GlossaryMetrics } from '@/types'
+
+@Component({})
+export default class MetricGlossary extends Vue {
+  private isSearching = false;
+
+  private results: GlossaryMetrics[] = [];
+
+  get definitions() {
+    return configStore.currentLang === 'fr' ? configStore.metric.metricsFr : configStore.metric.metricsEn
+  }
+
+  private onSearchChange(query: string) {
+    if (query.length) {
+      this.isSearching = true
+      return this.results =  this.definitions.filter((d) => {
+        return d.name.toLowerCase().match(query.toLowerCase())
+      })
+    } else {
+      return this.isSearching = false
+    }
+  }
+}
+</script>
